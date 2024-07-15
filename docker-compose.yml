@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+    db:
+      image: postgres:latest
+      command: postgres -c 'max_connections=500'
+      restart: always
+      environment:
+          POSTGRES_USER: ${user}
+          POSTGRES_PASSWORD: ${password}
+          POSTGRES_DB: ${DBName}
+          PGDATA: /var/lib/postgresql/data/pgdata
+          TZ: Europe/Moscow
+      volumes:
+          - postgres-db-data:/var/lib/postgresql/data
+      ports:
+        - "5432:5432"
+
+    web:
+        build: 
+            context: .
+        restart:
+            on-failure
+        environment:
+            HOST: ${HOST}
+            PORT: ${PORT}
+            DATABASEURL: ${DATABASEURL}
+            TZ: Europe/Moscow
+            LOGPATH: /var/lib/chsuBotGo/data/logs/
+            TYPESTART: 
+        depends_on:
+            - db
+        volumes:
+            - web-logs:/var/lib/chsuBotGo/data
+        ports:
+          - "8080:${PORT}"
+volumes:
+    postgres-db-data:
+        name: postgres-db-data
+    web-logs:
+        name: web-logs
